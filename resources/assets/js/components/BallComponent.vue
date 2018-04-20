@@ -1,12 +1,15 @@
 <template>
     <div>
+        <ul>
+            <li v-for="user in users">{{ user.name }}</li>
+        </ul>
         <p v-if="gamepad">Id: {{ gamepad.id }}</p>
-        <div v-for="ball in balls" ></div>
+        <div v-for="ball in balls" class="ball" v-key="ball.id" ></div>
     </div>
 </template>
 
 <style>
-    #ball {
+    .ball {
         position: absolute;
         left: calc(50vw - 25px);
         top: calc(50vh - 25px);
@@ -22,7 +25,8 @@
     data() {
       return {
         gamepad: null,
-        balls: []
+        balls: [],
+        users: []
       }
     },
     methods: {
@@ -45,39 +49,47 @@
       }
     },
     mounted() {
+      console.log('Mounted!!!')
       console.log(Echo)
       Echo.join('balls')
         .here((users) => {
           console.log('HERE!!!!!!!!!!')
-          console.log(users);
-        })
-        .joining((user) => {
-          console.log('JOINING!!!!!!!!!!')
-          console.log(user.name);
-        })
-        .leaving((user) => {
-          console.log('LEAVING!!!!!!!!!!')
-          console.log(user.name);
-        });
-
-      window.addEventListener("gamepadconnected", (e) => {
-        console.log('NEW GAMEPAD -> NEW BALL')
-        axios.post('ball').then((response) => {
-          console.log('OK')
-        }).catch((error) => {
-          console.log(error)
-        })
-        Echo.private('balls')
-          .whisper('new_ball', {
-            gamepad: e.gamepad
-          });
-        console.log('BALLS 2')
-        console.log('New gamepad connected')
-        console.log(e.gamepad.id)
+          console.log(users)
+          this.users = users
+          window.addEventListener("gamepadconnected", (e) => {
+            console.log('############### NEW GAMEPAD -> NEW BALL')
+            axios.post('ball').then((response) => {
+              console.log('OK')
+            }).catch((error) => {
+              console.log(error)
+            })
+            Echo.private('balls')
+              .whisper('new_ball', {
+                gamepad: e.gamepad
+              });
+            console.log('BALLS 2')
+            console.log('New gamepad connected')
+            console.log(e.gamepad.id)
 //        this.$refs.ball.style.backgroundColor = "green"
 //        this.gamepad = e.gamepad
 //        this.updateLoop()
-      });
+          });
+        })
+        .joining((user) => {
+          console.log('JOINING!!!!!!!!!!')
+          console.log(user.name)
+          this.users.push(user)
+        })
+        .leaving((user) => {
+          console.log('LEAVING!!!!!!!!!!')
+          console.log(user.name)
+          this.users.splice(this.users.indexOf(user),1)
+        })
+        .listen('NewBall', (e) => {
+          console.log('NEW BALL RECEIVED!')
+          console.log(e)
+          this.balls.push(e.ball)
+        });
     }
   }
 </script>

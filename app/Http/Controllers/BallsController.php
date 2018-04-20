@@ -8,6 +8,7 @@ class BallsController extends Controller
 {
     public function store()
     {
-        event(new NewBall());
+        $ball = Ball::forceCreate();
+        event(new NewBall($ball));
     }
 }

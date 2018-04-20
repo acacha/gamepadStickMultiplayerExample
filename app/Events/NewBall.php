@@ -19,14 +19,16 @@ class NewBall implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $ball;
+
     /**
-     * Create a new event instance.
+     * NewBall constructor.
      *
-     * @return void
+     * @param $ball
      */
-    public function __construct()
+    public function __construct($ball)
     {
-        //
+        $this->ball = $ball;
     }
 
     /**
